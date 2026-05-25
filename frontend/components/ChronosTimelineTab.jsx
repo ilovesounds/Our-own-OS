@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { History, ArrowLeftRight, CheckCircle2, RotateCcw, AlertTriangle, FileCode } from 'lucide-react';
 import { getApiUrl } from '@/utils/api';
 
@@ -12,6 +12,12 @@ export default function ChronosTimelineTab({ statusData, onTriggerRollback }) {
   const [isRollingBack, setIsRollingBack] = useState(false);
   const [rollbackSuccess, setRollbackSuccess] = useState(false);
 
+  // Keep a ref of selectedSnapshotId to prevent stale closure in setInterval
+  const selectedSnapshotIdRef = useRef(selectedSnapshotId);
+  useEffect(() => {
+    selectedSnapshotIdRef.current = selectedSnapshotId;
+  }, [selectedSnapshotId]);
+
   // Fetch snapshots list
   const fetchSnapshots = async () => {
     try {
@@ -20,7 +26,7 @@ export default function ChronosTimelineTab({ statusData, onTriggerRollback }) {
         const data = await res.json();
         setSnapshots(data);
         // Automatically select the latest if none selected
-        if (data.length > 0 && selectedSnapshotId === null) {
+        if (data.length > 0 && selectedSnapshotIdRef.current === null) {
           const latest = data[data.length - 1];
           setSelectedSnapshotId(latest.id);
           setSliderVal(data.length - 1);
