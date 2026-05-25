@@ -635,6 +635,76 @@ export default function LandingPage({ onEnterConsole }) {
           </div>
         </div>
 
+        {/* 3. LangGraph Workflow Execution Protocol */}
+        <div className="space-y-6">
+          <h4 className="text-sm font-bold text-zinc-400 uppercase tracking-wider font-mono">3. Agentic Graph Execution Protocol</h4>
+          <div className="bg-zinc-950/40 border border-zinc-900 rounded-lg p-6 space-y-6">
+            <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+              ChronosDev orchestrates agentic tasks through a cyclic state management model powered by LangGraph. Below is the operational sequence triggered when a user issues an intent prompt:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+              <div className="border-l-2 border-cyan-500 pl-4 space-y-1">
+                <span className="text-[10px] font-mono text-cyan-400">PHASE 01</span>
+                <h5 className="text-xs font-bold text-white uppercase font-mono">Intent Parsing</h5>
+                <p className="text-[11px] text-zinc-500 font-sans leading-relaxed">
+                  Llama 3.3 vectorizes raw prompt strings into validated JSON schemas, selecting target file buffers and routing requirements.
+                </p>
+              </div>
+              <div className="border-l-2 border-cyan-500 pl-4 space-y-1">
+                <span className="text-[10px] font-mono text-cyan-400">PHASE 02</span>
+                <h5 className="text-xs font-bold text-white uppercase font-mono">Checklist Compilation</h5>
+                <p className="text-[11px] text-zinc-500 font-sans leading-relaxed">
+                  Core 00 (Planner) maps constraints, compiles target checklists, and establishes file dependencies.
+                </p>
+              </div>
+              <div className="border-l-2 border-cyan-500 pl-4 space-y-1">
+                <span className="text-[10px] font-mono text-cyan-400">PHASE 03</span>
+                <h5 className="text-xs font-bold text-white uppercase font-mono">Source Construction</h5>
+                <p className="text-[11px] text-zinc-500 font-sans leading-relaxed">
+                  Core 01 (Coder) accesses plan objectives and writes modular modules directly to local directories.
+                </p>
+              </div>
+              <div className="border-l-2 border-cyan-500 pl-4 space-y-1">
+                <span className="text-[10px] font-mono text-cyan-400">PHASE 04</span>
+                <h5 className="text-xs font-bold text-white uppercase font-mono">Assurance & Healing</h5>
+                <p className="text-[11px] text-zinc-500 font-sans leading-relaxed">
+                  Core 02 (Tester) validates source code. If assertions fail, Core 03 (Self-Corrector) reviews trace logs and applies repairs.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. HydraDB Engine Overview */}
+        <div className="space-y-6">
+          <h4 className="text-sm font-bold text-zinc-400 uppercase tracking-wider font-mono">4. Hybrid Edge-to-Cloud Database Engine</h4>
+          <div className="bg-zinc-950/40 border border-zinc-900 rounded-lg p-6 space-y-6">
+            <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+              Data reliability is managed using a zero-trust dual journal system, linking edge execution with cloud database states:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div className="bg-zinc-900/20 border border-zinc-900 rounded p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-lime-400"></span>
+                  <h5 className="text-xs font-bold text-white uppercase font-mono">Immutable SQLite Ledger</h5>
+                </div>
+                <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                  Stores live snapshots at `/tmp/hydradb.db` in serverless modes and `hydradb.db` in local modes. Preserves strict hash audits of plan states, corrected source scripts, and chronological execution timelines.
+                </p>
+              </div>
+              <div className="bg-zinc-900/20 border border-zinc-900 rounded p-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-lime-400"></span>
+                  <h5 className="text-xs font-bold text-white uppercase font-mono">Ledger-Synced Time Travel</h5>
+                </div>
+                <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+                  Enables rollback recovery by capturing snapshots at every step transition. Restores plan checkmarks, disk buffers, and co-processor logs, letting you reverse chaotic system faults instantly.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </section>
 
     </div>

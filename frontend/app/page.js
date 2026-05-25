@@ -150,13 +150,13 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-cyber-dark text-zinc-100 font-sans">
       
       {/* Navigation Header */}
-      <header className="border-b border-cyber-gray bg-black/45 py-3 px-6 sticky top-0 z-50 backdrop-blur-md">
-        <div className="max-w-[95%] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <header className="border-b border-cyber-gray bg-black/45 py-3 px-4 sticky top-0 z-50 backdrop-blur-md">
+        <div className="w-full max-w-[98%] mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
           
           {/* Brand header */}
           <div 
             onClick={() => setViewMode('landing')}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity shrink-0"
           >
             <div className="p-1 rounded bg-zinc-900 border border-zinc-700/80 text-lime-400">
               <Monitor size={16} />
@@ -167,79 +167,79 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Nav Links (Horizontal) */}
-          <nav className="flex items-center gap-1.5 md:gap-2.5 flex-nowrap shrink-0 overflow-x-auto">
+          {/* Nav Links (Horizontal with Wrap Support) */}
+          <nav className="flex items-center justify-center gap-1 sm:gap-1.5 flex-wrap shrink-0">
             <button
               onClick={() => setViewMode('landing')}
-              className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-mono tracking-wide cursor-pointer border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40 transition-all duration-205"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono tracking-wide cursor-pointer border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40 transition-all duration-205"
             >
-              <HomeIcon size={14} className="text-zinc-500" />
+              <HomeIcon size={12} className="text-zinc-500" />
               <span>🏠 Landing</span>
             </button>
 
             <button
               onClick={() => setActiveTab('prompter')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
                 activeTab === 'prompter'
                   ? 'bg-green-950/20 text-green-400 border-green-900/60 shadow-[0_0_10px_rgba(34,197,94,0.15)] font-bold'
                   : 'text-zinc-400 border-transparent hover:text-zinc-200 hover:bg-zinc-900/40'
               }`}
             >
-              <Terminal size={14} className={activeTab === 'prompter' ? 'text-green-400' : 'text-zinc-500'} />
+              <Terminal size={12} className={activeTab === 'prompter' ? 'text-green-400' : 'text-zinc-500'} />
               <span>🖥️ Prompter Shell</span>
             </button>
 
             <button
               onClick={() => setActiveTab('devfactory')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
                 activeTab === 'devfactory'
                   ? 'bg-cyan-950/20 text-cyan-400 border-cyan-900/60 shadow-[0_0_10px_rgba(6,182,212,0.15)] font-bold'
                   : 'text-zinc-400 border-transparent hover:text-zinc-200 hover:bg-zinc-900/40'
               }`}
             >
-              <Cpu size={14} className={activeTab === 'devfactory' ? 'text-cyan-400' : 'text-zinc-500'} />
+              <Cpu size={12} className={activeTab === 'devfactory' ? 'text-cyan-400' : 'text-zinc-500'} />
               <span>⚙️ DevFactory Cores</span>
             </button>
 
             <button
               onClick={() => setActiveTab('chaos')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
                 activeTab === 'chaos'
                   ? 'bg-red-950/20 text-red-400 border-red-900/60 shadow-[0_0_10px_rgba(239,68,68,0.15)] font-bold'
                   : 'text-zinc-400 border-transparent hover:text-zinc-200 hover:bg-zinc-900/40'
               }`}
             >
-              <Zap size={14} className={activeTab === 'chaos' ? 'text-red-400' : 'text-zinc-500'} />
+              <Zap size={12} className={activeTab === 'chaos' ? 'text-red-400' : 'text-zinc-500'} />
               <span>💥 Chaos Control</span>
             </button>
 
             <button
               onClick={() => setActiveTab('chronos')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
                 activeTab === 'chronos'
                   ? 'bg-lime-950/10 text-lime-400 border-lime-900/40 shadow-[0_0_10px_rgba(132,204,22,0.15)] font-bold'
                   : 'text-zinc-400 border-transparent hover:text-zinc-200 hover:bg-zinc-900/40'
               }`}
             >
-              <History size={14} className={activeTab === 'chronos' ? 'text-lime-400' : 'text-zinc-500'} />
+              <History size={12} className={activeTab === 'chronos' ? 'text-lime-400' : 'text-zinc-500'} />
               <span>⏳ Chronos Timeline</span>
             </button>
 
             <button
               onClick={() => setActiveTab('docs')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono tracking-wide cursor-pointer border transition-all duration-205 ${
                 activeTab === 'docs'
                   ? 'bg-zinc-900/40 text-lime-400 border-zinc-800 shadow-[0_0_10px_rgba(132,204,22,0.15)] font-bold'
                   : 'text-zinc-400 border-transparent hover:text-zinc-200 hover:bg-zinc-900/40'
               }`}
             >
-              <HelpCircle size={14} className={activeTab === 'docs' ? 'text-lime-400' : 'text-zinc-500'} />
+              <HelpCircle size={12} className={activeTab === 'docs' ? 'text-lime-400' : 'text-zinc-500'} />
               <span>📖 Specs & Guide</span>
             </button>
           </nav>
 
           {/* Telemetry Badges */}
-          <div className="flex items-center gap-2 text-[10px] font-mono">
+          <div className="flex items-center gap-2 text-[10px] font-mono shrink-0">
             <div className="flex items-center gap-1.5 bg-zinc-900/80 border border-zinc-800 px-2 py-1 rounded">
               <span className="text-zinc-500">DB LINK:</span>
               <span className={statusData.cores ? "text-lime-400 font-bold" : "text-red-500"}>ACTIVE</span>
