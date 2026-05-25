@@ -50,6 +50,22 @@ async def startup_event():
     database.add_log("System", "INFO", "KERNEL :: PrompterOS Kernel Booted Successfully.")
     database.add_log("System", "INFO", "Ready for natural language intent...")
 
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "service": "ChronosDev Chaos OS Kernel",
+        "version": "1.0"
+    }
+
+@app.get("/api")
+@app.get("/api/")
+async def api_root():
+    return {
+        "status": "online",
+        "message": "API gateway is operational. Use /api/devfactory/status to fetch system logs and core diagnostics."
+    }
+
 # 1. Parse prompt & boot LangGraph workflow
 @app.post("/api/parse-intent")
 async def parse_intent(request: PromptRequest, background_tasks: BackgroundTasks):
