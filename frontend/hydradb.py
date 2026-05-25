@@ -5,7 +5,11 @@ class Client:
     def __init__(self, api_key: str, tenant: str):
         self.api_key = api_key
         self.tenant = tenant
-        self.db_file = "hydradb.db"
+        import os
+        if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            self.db_file = "/tmp/hydradb.db"
+        else:
+            self.db_file = "hydradb.db"
         self._init_db()
         print("--------------------------------------------------")
         print(f"HYDRADB SECURE DATA LINK INITIALIZED")
