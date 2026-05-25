@@ -295,7 +295,7 @@ export default function LandingPage({ onEnterConsole }) {
             <Terminal size={22} className="animate-pulse" />
           </div>
           <div>
-            <h1 className="font-extrabold text-sm tracking-widest text-white uppercase leading-none">CHRONOSDEV</h1>
+            <h1 className="font-extrabold text-sm tracking-widest text-white uppercase leading-none">KRATOS OS</h1>
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1 block">AGENTIC SANDBOX SYSTEMS</span>
           </div>
         </header>
@@ -341,7 +341,7 @@ export default function LandingPage({ onEnterConsole }) {
               <div className="space-y-5 min-h-[310px] flex flex-col justify-between">
                 <div>
                   <div className="flex items-start gap-2 leading-relaxed">
-                    <span className="text-lime-400 shrink-0">user@chronos:~$</span>
+                    <span className="text-lime-400 shrink-0">user@kratos:~$</span>
                     <span className="text-zinc-300 whitespace-pre-wrap">{typedPrompt}</span>
                     {stage === 0 && <span className="w-1.5 h-4 bg-lime-400 animate-pulse inline-block align-middle"></span>}
                   </div>
@@ -611,22 +611,22 @@ export default function LandingPage({ onEnterConsole }) {
                   <span className="w-2 h-2 rounded-full bg-yellow-500/80"></span>
                   <span className="w-2 h-2 rounded-full bg-green-500/80"></span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500">chronos_ledger.db</span>
+                 <span className="text-[10px] font-mono text-zinc-500">kratos_ledger.db</span>
                 <span className="text-[9px] font-mono text-zinc-600 font-bold uppercase">MODE 04</span>
               </div>
               {/* Body */}
               <div className="p-5 font-mono text-[11px] space-y-3">
                 <div className="flex items-center gap-1.5 text-lime-400">
                   <span>$</span>
-                  <span>sqlite3 hydra.db "SELECT * FROM commits"</span>
+                  <span>sqlite3 kratos.db "SELECT * FROM commits"</span>
                 </div>
                 <div className="text-zinc-300 leading-relaxed space-y-1">
-                  <p className="text-white font-bold uppercase text-xs tracking-wide">⏳ CHRONOS MODE</p>
+                   <p className="text-white font-bold uppercase text-xs tracking-wide">⏳ KRATOS OS MODE</p>
                   <p className="text-zinc-400 text-[11px] font-sans mt-1">
                     The snapshot history ledger navigator. Records full-state workspaces, configuration logs, and timeline journal actions, enabling developers to roll the workspace state back seamlessly.
                   </p>
                   <div className="pt-2 text-lime-400">
-                    TIMELINE_STATUS: SYNCED_WITH_HYDRADB
+                    TIMELINE_STATUS: SYNCED_WITH_KRATOSDB
                   </div>
                 </div>
               </div>
@@ -640,7 +640,7 @@ export default function LandingPage({ onEnterConsole }) {
           <h4 className="text-sm font-bold text-zinc-400 uppercase tracking-wider font-mono">3. Agentic Graph Execution Protocol</h4>
           <div className="bg-zinc-950/40 border border-zinc-900 rounded-lg p-6 space-y-6">
             <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-              ChronosDev orchestrates agentic tasks through a cyclic state management model powered by LangGraph. Below is the operational sequence triggered when a user issues an intent prompt:
+              Kratos OS orchestrates agentic tasks through a cyclic state management model powered by LangGraph. Below is the operational sequence triggered when a user issues an intent prompt:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
               <div className="border-l-2 border-cyan-500 pl-4 space-y-1">

@@ -14,7 +14,7 @@ import agent_graph
 # Load environment variables from the .env file
 load_dotenv()
 
-app = FastAPI(title="ChronosDev Chaos OS Kernel")
+app = FastAPI(title="Kratos OS Chaos Kernel")
 
 # Configure CORS middleware
 app.add_middleware(
@@ -57,7 +57,7 @@ async def startup_event():
 async def root():
     return {
         "status": "online",
-        "service": "ChronosDev Chaos OS Kernel",
+        "service": "Kratos OS Chaos Kernel",
         "version": "1.0"
     }
 
@@ -314,7 +314,7 @@ async def rollback_state(request: RollbackRequest):
         agent_graph.OSState.cores[core] = "IDLE"
         
     # Log the rollback event
-    database.add_log("Chronos", "INFO", f"[ROLLBACK] Restore point triggered! Reverted workspace database state to Snapshot #{request.snapshot_id}.")
+    database.add_log("KratosOS", "INFO", f"[ROLLBACK] Restore point triggered! Reverted workspace database state to Snapshot #{request.snapshot_id}.")
     
     # Write a new rollback event snapshot to register it in history
     database.create_snapshot(snapshot["plan"], snapshot["code"], "RECOVERED")

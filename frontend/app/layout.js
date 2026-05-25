@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "ChronosDev Chaos OS — The Agentic Sandbox",
+  title: "Kratos OS — The Agentic Sandbox",
   description: "Futuristic 6-core LangGraph orchestration container with Chaos stress test injection and time-travel ledger recovery.",
 };
 

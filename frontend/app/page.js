@@ -162,7 +162,7 @@ export default function Home() {
               <Monitor size={16} />
             </div>
             <div>
-              <h2 className="font-extrabold text-xs tracking-wide text-white uppercase leading-none">ChronosDev</h2>
+              <h2 className="font-extrabold text-xs tracking-wide text-white uppercase leading-none">Kratos OS</h2>
               <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest mt-0.5 block">Chaos OS v1.0</span>
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function Home() {
               }`}
             >
               <History size={12} className={activeTab === 'chronos' ? 'text-lime-400' : 'text-zinc-500'} />
-              <span>Chronos</span>
+              <span>Kratos</span>
             </button>
 
             <button

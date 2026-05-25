@@ -97,7 +97,7 @@ export default function ChronosTimelineTab({ statusData, onTriggerRollback }) {
       <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            ⏳ Chronos Timeline
+            ⏳ Kratos OS Timeline
           </h1>
         </div>
         <div>
