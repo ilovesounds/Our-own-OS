@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Terminal, Send, Cpu, CheckCircle } from 'lucide-react';
+import { getApiUrl } from '@/utils/api';
 
 export default function PrompterTab({ setActiveTab }) {
   const [input, setInput] = useState('');
@@ -34,7 +35,7 @@ export default function PrompterTab({ setActiveTab }) {
     setConsoleLines(prev => [...prev, 'KERNEL PARSER :: Intercepting signal... Parsing NLP vectors.']);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/parse-intent', {
+      const response = await fetch(getApiUrl('/api/parse-intent'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: userPrompt }),

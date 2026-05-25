@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Terminal, Cpu, Zap, History, LayoutGrid, Monitor, HelpCircle, Home as HomeIcon } from 'lucide-react';
+import { getApiUrl } from '@/utils/api';
 import PrompterTab from '@/components/PrompterTab';
 import DevFactoryTab from '@/components/DevFactoryTab';
 import ChaosControlTab from '@/components/ChaosControlTab';
@@ -34,7 +35,7 @@ export default function Home() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/devfactory/status');
+        const res = await fetch(getApiUrl('/api/devfactory/status'));
         if (res.ok) {
           const data = await res.json();
           setStatusData(data);
@@ -51,7 +52,7 @@ export default function Home() {
 
   const handleToggleChaos = async (enabled) => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/chaos/toggle', {
+      const res = await fetch(getApiUrl('/api/chaos/toggle'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled })
@@ -84,7 +85,7 @@ export default function Home() {
 
   const handleTriggerRecovery = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/devfactory/recover', {
+      const res = await fetch(getApiUrl('/api/devfactory/recover'), {
         method: 'POST'
       });
       if (res.ok) {
@@ -100,7 +101,7 @@ export default function Home() {
 
   const handleDismissRecovery = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/devfactory/clear-fault', {
+      const res = await fetch(getApiUrl('/api/devfactory/clear-fault'), {
         method: 'POST'
       });
       if (res.ok) {

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { History, ArrowLeftRight, CheckCircle2, RotateCcw, AlertTriangle, FileCode } from 'lucide-react';
+import { getApiUrl } from '@/utils/api';
 
 export default function ChronosTimelineTab({ statusData, onTriggerRollback }) {
   const [snapshots, setSnapshots] = useState([]);
@@ -14,7 +15,7 @@ export default function ChronosTimelineTab({ statusData, onTriggerRollback }) {
   // Fetch snapshots list
   const fetchSnapshots = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/chronos/snapshots');
+      const res = await fetch(getApiUrl('/api/chronos/snapshots'));
       if (res.ok) {
         const data = await res.json();
         setSnapshots(data);
@@ -42,7 +43,7 @@ export default function ChronosTimelineTab({ statusData, onTriggerRollback }) {
 
     const fetchDetails = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/chronos/snapshot/${selectedSnapshotId}`);
+        const res = await fetch(getApiUrl(`/api/chronos/snapshot/${selectedSnapshotId}`));
         if (res.ok) {
           const data = await res.json();
           setSnapshotDetails(data);
@@ -70,7 +71,7 @@ export default function ChronosTimelineTab({ statusData, onTriggerRollback }) {
     setRollbackSuccess(false);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/chronos/rollback', {
+      const res = await fetch(getApiUrl('/api/chronos/rollback'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ snapshot_id: selectedSnapshotId })

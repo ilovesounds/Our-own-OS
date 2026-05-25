@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, AlertOctagon, RefreshCw, Zap, Bomb } from 'lucide-react';
+import { getApiUrl } from '@/utils/api';
 
 export default function ChaosControlTab({ statusData, onToggleChaos }) {
   const [chaosLogs, setChaosLogs] = useState([]);
@@ -12,7 +13,7 @@ export default function ChaosControlTab({ statusData, onToggleChaos }) {
   useEffect(() => {
     const fetchChaosLogs = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/chaos/logs');
+        const res = await fetch(getApiUrl('/api/chaos/logs'));
         if (res.ok) {
           const data = await res.json();
           setChaosLogs(data);
