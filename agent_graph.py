@@ -11,6 +11,7 @@ import database
 # Global OS State for real-time polling
 class OSState:
     chaos_enabled = False
+    custom_chaos_script = ""
     active_core = None
     cores = {
         "Core 00": "IDLE",  # Planner
@@ -67,6 +68,31 @@ def trigger_hydradb_sync(plan: str, code: str, status: str, source: str, log_mes
     OSState.cores["Core 05"] = "IDLE"
     return snap_id
 
+def check_chaos_intercept(core_id: str, default_error_type: str, default_msg: str, state: AgentState):
+    if not OSState.chaos_enabled:
+        return None
+
+    OSState.cores[core_id] = "ERROR"
+    error_msg = default_msg
+    error_type = default_error_type
+
+    if getattr(OSState, "custom_chaos_script", None):
+        try:
+            local_vars = {"state": state, "database": database, "OSState": OSState, "core_id": core_id}
+            exec(OSState.custom_chaos_script, {}, local_vars)
+        except Exception as e:
+            error_type = type(e).__name__
+            error_msg = str(e)
+
+    source_log = core_id.replace("Core ", "")
+    database.add_log("Chaos", "CHAOS", f"[CHAOS] {error_type}: {error_msg}")
+    database.add_log(source_log, "ERROR", f"Execution failed. Fault: {error_msg}")
+    state["errors"].append(f"{error_type}: {error_msg}")
+    state["status"] = "CHAOS_FAULT"
+    OSState.last_error = f"{error_type}: {error_msg}"
+    trigger_hydradb_sync(state["plan"], state["code"], "CHAOS_FAULT", source_log, "Snapshot saved in ERROR state.")
+    return state
+
 # ----------------- Core 00: Planner Node -----------------
 def planner_node(state: AgentState) -> AgentState:
     OSState.active_core = "Core 00"
@@ -81,15 +107,9 @@ def planner_node(state: AgentState) -> AgentState:
         return state
 
     # 1. Chaos Interceptor Check
-    if OSState.chaos_enabled:
-        OSState.cores["Core 00"] = "ERROR"
-        database.add_log("Chaos", "CHAOS", "[CHAOS] Corrupting context window data blocks... Core 00 input register error.")
-        database.add_log("Planner", "ERROR", "Planner execution aborted. Fault code: ContextWindowCorruption (500)")
-        state["errors"].append("Planner failed due to ContextWindowCorruption.")
-        state["status"] = "CHAOS_FAULT"
-        OSState.last_error = "ContextWindowCorruption (500) at Planner Core"
-        trigger_hydradb_sync(state["plan"], state["code"], "CHAOS_FAULT", "Planner", "Snapshot saved in ERROR state.")
-        return state
+    intercept = check_chaos_intercept("Core 00", "ContextWindowCorruption", "Context window data corruption (500)", state)
+    if intercept:
+        return intercept
 
     # 2. Plan Generation
     groq_client = get_groq_client()
@@ -158,15 +178,9 @@ def coder_node(state: AgentState) -> AgentState:
     time.sleep(2.0)
 
     # 1. Chaos Interceptor Check
-    if OSState.chaos_enabled:
-        OSState.cores["Core 01"] = "ERROR"
-        database.add_log("Chaos", "CHAOS", "[CHAOS] Disconnecting file_write_tool.sys... Disk buffer I/O timeout.")
-        database.add_log("Coder", "ERROR", "Coder execution failed. IOException: Failed to write logistics_tracker.py")
-        state["errors"].append("Coder failed: file_write_tool.sys write error.")
-        state["status"] = "CHAOS_FAULT"
-        OSState.last_error = "IOException: file_write_tool.sys disconnected (500)"
-        trigger_hydradb_sync(state["plan"], state["code"], "CHAOS_FAULT", "Coder", "Snapshot saved in ERROR state.")
-        return state
+    intercept = check_chaos_intercept("Core 01", "IOException", "file_write_tool.sys disconnected (500)", state)
+    if intercept:
+        return intercept
 
     # 2. Code Generation
     groq_client = get_groq_client()
@@ -243,15 +257,9 @@ def tester_node(state: AgentState) -> AgentState:
     time.sleep(2.0)
 
     # 1. Chaos Interceptor Check
-    if OSState.chaos_enabled:
-        OSState.cores["Core 02"] = "ERROR"
-        database.add_log("Chaos", "CHAOS", "[CHAOS] Injecting invalid error tracebacks into active nodes... Tester thread killed.")
-        database.add_log("Tester", "ERROR", "Test suite execution crashed: ZeroDivisionError in unit tests.")
-        state["errors"].append("Tester failed: ZeroDivisionError injected by ChaosOS.")
-        state["status"] = "CHAOS_FAULT"
-        OSState.last_error = "ZeroDivisionError: division by zero (Test Failure)"
-        trigger_hydradb_sync(state["plan"], state["code"], "CHAOS_FAULT", "Tester", "Snapshot saved in ERROR state.")
-        return state
+    intercept = check_chaos_intercept("Core 02", "ZeroDivisionError", "division by zero (Test Failure)", state)
+    if intercept:
+        return intercept
 
     # 2. Test Verification
     # Normally we run test scripts. Here we check code structure.
@@ -270,18 +278,13 @@ def corrector_node(state: AgentState) -> AgentState:
     state["iteration"] = state.get("iteration", 0) + 1
     OSState.active_core = "Core 03"
     OSState.cores["Core 03"] = "RUNNING"
-    database.add_log("Corrector", "WARNING", f"Core 03 activated: Self-correction attempt {state['iteration']}/3 initiated due to core faults.")
+    database.add_log("Corrector", "WARNING", f"Core 03 activated: Self-correction attempt {state['iteration']}/10 initiated due to core faults.")
     time.sleep(2.0)
 
     # 1. Chaos Interceptor Check - If Chaos is STILL on, we keep failing
-    if OSState.chaos_enabled:
-        OSState.cores["Core 03"] = "ERROR"
-        database.add_log("Chaos", "CHAOS", f"[CHAOS] Corrupting context window data blocks... Retry {state['iteration']}/3 blocked.")
-        database.add_log("Corrector", "ERROR", f"Self-Corrector failed. Exception: Critical tool intercept error. Retry stack overflow.")
-        state["status"] = "CHAOS_FAULT"
-        OSState.last_error = f"CriticalToolInterceptError (500) at Self-Corrector Core (Attempt {state['iteration']}/3)"
-        trigger_hydradb_sync(state["plan"], state["code"], "CHAOS_FAULT", "Corrector", "Snapshot saved in persistent ERROR state.")
-        return state
+    intercept = check_chaos_intercept("Core 03", "CriticalToolInterceptError", f"Critical tool intercept error. Retry stack overflow (Attempt {state['iteration']}/10)", state)
+    if intercept:
+        return intercept
 
     # 2. Resolve Errors (Self-Healing)
     database.add_log("Corrector", "INFO", "Chaos Mode OFF. Starting source code repair utilizing LLM...")
@@ -350,15 +353,9 @@ def deployer_node(state: AgentState) -> AgentState:
     time.sleep(2.0)
 
     # 1. Chaos Interceptor Check
-    if OSState.chaos_enabled:
-        OSState.cores["Core 04"] = "ERROR"
-        database.add_log("Chaos", "CHAOS", "[CHAOS] Server cluster disconnected during deployment... API gateway drop.")
-        database.add_log("Deployer", "ERROR", "Deployment failed. NetworkError: Connection reset by remote host.")
-        state["errors"].append("Deployer failed: Network connection reset.")
-        state["status"] = "CHAOS_FAULT"
-        OSState.last_error = "NetworkError: Connection reset by host (Deployment Failure)"
-        trigger_hydradb_sync(state["plan"], state["code"], "CHAOS_FAULT", "Deployer", "Snapshot saved in ERROR state.")
-        return state
+    intercept = check_chaos_intercept("Core 04", "NetworkError", "Connection reset by host (Deployment Failure)", state)
+    if intercept:
+        return intercept
 
     # 2. Finalize Deployment
     database.add_log("Deployer", "INFO", f"Bundle package completed: {state['target']}.tar.gz compiled.")
@@ -376,8 +373,8 @@ def router_edge(state: AgentState) -> str:
     Decides the next node transition in the graph based on the state.
     """
     # Guard against infinite self-correction loops under persistent Chaos
-    if state.get("iteration", 0) >= 3:
-        database.add_log("System", "ERROR", "LangGraph Loop Guard: Self-Correction failed after 3 attempts due to persistent Chaos disruption. Halting execution.")
+    if state.get("iteration", 0) >= 10:
+        database.add_log("System", "ERROR", "LangGraph Loop Guard: Self-Correction failed after 10 attempts due to persistent Chaos disruption. Halting execution.")
         OSState.active_core = None
         OSState.cores["Core 03"] = "ERROR"
         return END

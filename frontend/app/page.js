@@ -151,7 +151,7 @@ export default function Home() {
       
       {/* Navigation Header */}
       <header className="border-b border-cyber-gray bg-black/45 py-3 px-4 sticky top-0 z-50 backdrop-blur-md">
-        <div className="w-full max-w-[98%] mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
+        <div className="w-full max-w-[98%] mx-auto flex flex-col xl:flex-row items-center justify-between gap-3">
           
           {/* Brand header */}
           <div 
@@ -174,7 +174,7 @@ export default function Home() {
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono tracking-wide cursor-pointer border border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40 transition-all duration-205"
             >
               <HomeIcon size={12} className="text-zinc-500" />
-              <span>🏠 Landing</span>
+              <span>Landing</span>
             </button>
 
             <button
@@ -186,7 +186,7 @@ export default function Home() {
               }`}
             >
               <Terminal size={12} className={activeTab === 'prompter' ? 'text-green-400' : 'text-zinc-500'} />
-              <span>🖥️ Prompter Shell</span>
+              <span>Prompter</span>
             </button>
 
             <button
@@ -198,7 +198,7 @@ export default function Home() {
               }`}
             >
               <Cpu size={12} className={activeTab === 'devfactory' ? 'text-cyan-400' : 'text-zinc-500'} />
-              <span>⚙️ DevFactory Cores</span>
+              <span>DevFactory</span>
             </button>
 
             <button
@@ -210,7 +210,7 @@ export default function Home() {
               }`}
             >
               <Zap size={12} className={activeTab === 'chaos' ? 'text-red-400' : 'text-zinc-500'} />
-              <span>💥 Chaos Control</span>
+              <span>Chaos</span>
             </button>
 
             <button
@@ -222,7 +222,7 @@ export default function Home() {
               }`}
             >
               <History size={12} className={activeTab === 'chronos' ? 'text-lime-400' : 'text-zinc-500'} />
-              <span>⏳ Chronos Timeline</span>
+              <span>Chronos</span>
             </button>
 
             <button
@@ -234,7 +234,7 @@ export default function Home() {
               }`}
             >
               <HelpCircle size={12} className={activeTab === 'docs' ? 'text-lime-400' : 'text-zinc-500'} />
-              <span>📖 Specs & Guide</span>
+              <span>Specs</span>
             </button>
           </nav>
 

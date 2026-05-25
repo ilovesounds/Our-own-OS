@@ -38,6 +38,9 @@ class PromptRequest(BaseModel):
 class ChaosToggleRequest(BaseModel):
     enabled: bool
 
+class ChaosScriptRequest(BaseModel):
+    script: str
+
 class RollbackRequest(BaseModel):
     snapshot_id: int
 
@@ -214,6 +217,7 @@ async def get_devfactory_status():
         "current_code": agent_graph.OSState.current_code,
         "last_error": agent_graph.OSState.last_error,
         "chaos_enabled": agent_graph.OSState.chaos_enabled,
+        "custom_chaos_script": agent_graph.OSState.custom_chaos_script,
         "recovery_status": agent_graph.OSState.recovery_status,
         "logs": database.get_logs(limit=60)
     }
@@ -238,6 +242,13 @@ async def toggle_chaos(request: ChaosToggleRequest):
         database.add_log("Chaos", "INFO", "[CHAOS] Chaos Monkey Mode disabled. Restoring memory channels and tool links.")
         
     return {"chaos_enabled": agent_graph.OSState.chaos_enabled}
+
+# 3.2 Save Custom Chaos Script
+@app.post("/api/chaos/script")
+async def save_chaos_script(request: ChaosScriptRequest):
+    agent_graph.OSState.custom_chaos_script = request.script
+    database.add_log("Chaos", "INFO", "[CHAOS] Custom developer interceptor script registered / updated.")
+    return {"status": "success", "script": agent_graph.OSState.custom_chaos_script}
 
 # 3.5 Trigger Manual Recovery when Chaos is OFF and system is in fault
 @app.post("/api/devfactory/recover")

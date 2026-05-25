@@ -7,7 +7,38 @@ import { getApiUrl } from '@/utils/api';
 export default function ChaosControlTab({ statusData, onToggleChaos }) {
   const [chaosLogs, setChaosLogs] = useState([]);
   const logScrollRef = useRef(null);
-  const { chaos_enabled = false, cores = {}, last_error = "" } = statusData || {};
+  const { chaos_enabled = false, cores = {}, last_error = "", custom_chaos_script = "" } = statusData || {};
+
+  const [customScript, setCustomScript] = useState("");
+  const [isSavingScript, setIsSavingScript] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Load backend custom script value when statusData updates
+  useEffect(() => {
+    if (statusData && statusData.custom_chaos_script !== undefined && !customScript) {
+      setCustomScript(statusData.custom_chaos_script);
+    }
+  }, [statusData]);
+
+  const handleSaveScript = async () => {
+    setIsSavingScript(true);
+    setSaveSuccess(false);
+    try {
+      const res = await fetch(getApiUrl('/api/chaos/script'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ script: customScript })
+      });
+      if (res.ok) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error("Failed to save custom chaos script:", err);
+    } finally {
+      setIsSavingScript(false);
+    }
+  };
 
   // Fetch chaos logs specifically
   useEffect(() => {
@@ -63,7 +94,7 @@ export default function ChaosControlTab({ statusData, onToggleChaos }) {
         {/* Left Column: Description and Controls */}
         <div className="lg:col-span-5 space-y-6">
           <div>
-            <h2 className="text-xl font-bold text-white mt-1 leading-tight tracking-tight">
+            <h2 className="text-3xl font-extrabold text-white mt-1 leading-none tracking-tight">
               ChaosOS — the OS as an arena
             </h2>
           </div>
@@ -101,6 +132,37 @@ export default function ChaosControlTab({ statusData, onToggleChaos }) {
             <p className="text-[10px] text-zinc-500 font-sans leading-relaxed">
               * Enabling Chaos Monkey signals the interceptor to hijack tool links (disk writes, network pipes) and output artificial tracebacks.
             </p>
+          </div>
+
+          {/* Memory Legend & Status Keys */}
+          <div className="p-4 bg-zinc-950/40 border border-zinc-900 rounded-lg space-y-3">
+            <h4 className="text-xs font-bold text-zinc-300 uppercase tracking-widest font-mono">Core Arena Color Coding</h4>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-xs font-mono">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 bg-blue-400 border border-blue-300 rounded shrink-0"></span>
+                <span className="text-zinc-400"><strong className="text-white font-bold">P1</strong>: Core 00/01 (IDLE)</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 bg-purple-400 border border-purple-300 rounded shrink-0"></span>
+                <span className="text-zinc-400"><strong className="text-white font-bold">P2</strong>: Core 02/03 (IDLE)</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 bg-yellow-400 border border-yellow-300 rounded shrink-0"></span>
+                <span className="text-zinc-400"><strong className="text-white font-bold">P4</strong>: Core 04/05 (IDLE)</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 bg-cyan-400 border border-cyan-300 rounded shrink-0"></span>
+                <span className="text-cyan-400 font-bold">CYAN: Active Core</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 bg-red-500 border border-red-400 rounded shrink-0 animate-pulse"></span>
+                <span className="text-red-400 font-bold">RED: Chaos Fault</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3.5 h-3.5 bg-zinc-950 border border-zinc-900 rounded shrink-0"></span>
+                <span className="text-zinc-500">N/A: Buffer Block</span>
+              </div>
+            </div>
           </div>
 
           {/* Meta text bullets mirroring screenshot style */}
@@ -196,6 +258,46 @@ export default function ChaosControlTab({ statusData, onToggleChaos }) {
                 )}
               </span>
               <span>server 42m 12s</span>
+            </div>
+          </div>
+
+          {/* Custom Chaos Interceptor Script Injector */}
+          <div className="p-5 bg-zinc-950/80 border border-zinc-800 rounded-lg flex flex-col gap-3 shadow-xl">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                <ShieldAlert size={14} className="text-red-500 animate-pulse" />
+                DEVELOPER CHAOS SCRIPT
+              </span>
+              <span className="text-[10px] text-zinc-500 font-mono">python runtime</span>
+            </div>
+            
+            <p className="text-[10px] text-zinc-400 font-sans leading-relaxed">
+              Write a Python script to hijack state/execution logic. You can raise exceptions to stop core operations.
+            </p>
+
+            <div className="relative font-mono text-xs">
+              <textarea
+                value={customScript}
+                onChange={(e) => setCustomScript(e.target.value)}
+                placeholder={`# Custom script to stop agent execution
+# Example:
+raise Exception("Chaos Developer Intercept: Tool links broken!")`}
+                rows={5}
+                className="w-full bg-black/90 text-emerald-400 p-3 rounded border border-zinc-800 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none resize-none font-mono text-[11px]"
+              />
+            </div>
+
+            <div className="flex justify-between items-center gap-2">
+              <span className="text-[9px] text-zinc-500 font-sans">
+                Scope: <code>state</code>, <code>database</code>, <code>OSState</code>
+              </span>
+              <button
+                onClick={handleSaveScript}
+                disabled={isSavingScript}
+                className="py-1.5 px-3 rounded text-[10px] bg-red-600 hover:bg-red-700 text-white font-extrabold flex items-center gap-1 transition cursor-pointer disabled:opacity-50"
+              >
+                {isSavingScript ? "SAVING..." : saveSuccess ? "✓ REGISTERED" : "REGISTER SCRIPT"}
+              </button>
             </div>
           </div>
         </div>

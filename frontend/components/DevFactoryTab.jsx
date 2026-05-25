@@ -123,7 +123,7 @@ export default function DevFactoryTab({ statusData, onTriggerRecovery, onDismiss
       {/* Header telemetry */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800 pb-4 gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
             ⚙️ DevFactory CPU Manager
           </h1>
         </div>

@@ -93,7 +93,7 @@ export default function DocsTab() {
       
       {/* Title */}
       <div className="border-b border-zinc-800 pb-4">
-        <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
           <HelpCircle className="text-lime-400" size={20} /> Specs & Core Architecture Guide
         </h1>
       </div>
