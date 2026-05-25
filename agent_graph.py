@@ -3,6 +3,7 @@ import os
 import random
 import traceback
 import anthropic
+from groq import Groq
 from typing import TypedDict, List, Dict, Any
 from langgraph.graph import StateGraph, END
 import database
@@ -38,6 +39,13 @@ class AgentState(TypedDict):
     errors: List[str]
     status: str
     iteration: int
+
+# Initialize Groq Client safely
+def get_groq_client():
+    api_key = os.getenv("GROQ_API_KEY")
+    if api_key:
+        return Groq(api_key=api_key)
+    return None
 
 # Initialize Claude API Client safely
 def get_anthropic_client():
@@ -84,13 +92,32 @@ def planner_node(state: AgentState) -> AgentState:
         return state
 
     # 2. Plan Generation
-    client = get_anthropic_client()
+    groq_client = get_groq_client()
+    anthropic_client = get_anthropic_client()
     instructions = state["instructions"]
     
-    if client:
+    plan = None
+    
+    if groq_client:
         try:
             system_instruction = "You are the PrompterOS Planner kernel (Core 00). Output a clean, checklist-based implementation plan in markdown."
-            response = client.messages.create(
+            response = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": f"Plan for: {instructions}"}
+                ],
+                temperature=0.2
+            )
+            plan = response.choices[0].message.content
+        except Exception as e:
+            print(f"Groq Planner failed: {e}")
+            database.add_log("Planner", "WARNING", f"Groq Planner failed, trying Anthropic... Details: {e}")
+            
+    if not plan and anthropic_client:
+        try:
+            system_instruction = "You are the PrompterOS Planner kernel (Core 00). Output a clean, checklist-based implementation plan in markdown."
+            response = anthropic_client.messages.create(
                 model="claude-3-5-sonnet-latest",
                 max_tokens=800,
                 temperature=0.2,
@@ -99,8 +126,10 @@ def planner_node(state: AgentState) -> AgentState:
             )
             plan = response.content[0].text
         except Exception as e:
-            plan = f"Mock Implementation Plan for {state['target']}\n- Setup environment\n- Build endpoints\n- Add logging"
-    else:
+            print(f"Anthropic Planner failed: {e}")
+            database.add_log("Planner", "WARNING", f"Anthropic Planner failed... Details: {e}")
+            
+    if not plan:
         plan = (
             f"# Execution Plan for {state['target']}\n"
             f"■ Step 1: Initialize code structure for '{state['target']}'.\n"
@@ -140,14 +169,33 @@ def coder_node(state: AgentState) -> AgentState:
         return state
 
     # 2. Code Generation
-    client = get_anthropic_client()
+    groq_client = get_groq_client()
+    anthropic_client = get_anthropic_client()
     plan = state["plan"]
     target = state["target"]
 
-    if client:
+    code = None
+
+    if groq_client:
         try:
             system_instruction = f"You are the PrompterOS Coder kernel (Core 01). Write clean, runnable code for {target}. Return ONLY the raw code."
-            response = client.messages.create(
+            response = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": f"Implementation plan:\n{plan}\n\nTarget File: {target}"}
+                ],
+                temperature=0.2
+            )
+            code = response.choices[0].message.content
+        except Exception as e:
+            print(f"Groq Coder failed: {e}")
+            database.add_log("Coder", "WARNING", f"Groq Coder failed, trying Anthropic... Details: {e}")
+
+    if not code and anthropic_client:
+        try:
+            system_instruction = f"You are the PrompterOS Coder kernel (Core 01). Write clean, runnable code for {target}. Return ONLY the raw code."
+            response = anthropic_client.messages.create(
                 model="claude-3-5-sonnet-latest",
                 max_tokens=1000,
                 temperature=0.2,
@@ -156,8 +204,10 @@ def coder_node(state: AgentState) -> AgentState:
             )
             code = response.content[0].text
         except Exception as e:
-            code = f"# Fallback Python code for {target}\nprint('Hello world from {target}')"
-    else:
+            print(f"Anthropic Coder failed: {e}")
+            database.add_log("Coder", "WARNING", f"Anthropic Coder failed... Details: {e}")
+
+    if not code:
         # Generate generic mock code
         code = (
             f"# === Generated System Module: {target} ===\n"
@@ -234,16 +284,35 @@ def corrector_node(state: AgentState) -> AgentState:
         return state
 
     # 2. Resolve Errors (Self-Healing)
-    database.add_log("Corrector", "INFO", "Chaos Mode OFF. Starting source code repair utilizing Claude LLM...")
+    database.add_log("Corrector", "INFO", "Chaos Mode OFF. Starting source code repair utilizing LLM...")
     
-    client = get_anthropic_client()
+    groq_client = get_groq_client()
+    anthropic_client = get_anthropic_client()
     code = state["code"]
     errors_list = "\n".join(state["errors"])
 
-    if client:
+    corrected_code = None
+
+    if groq_client:
         try:
             system_instruction = "You are the PrompterOS Self-Corrector kernel (Core 03). Resolve code errors based on the traceback. Return ONLY clean corrected code."
-            response = client.messages.create(
+            response = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": f"Errors:\n{errors_list}\n\nCode to repair:\n{code}"}
+                ],
+                temperature=0.2
+            )
+            corrected_code = response.choices[0].message.content
+        except Exception as e:
+            print(f"Groq Self-Corrector failed: {e}")
+            database.add_log("Corrector", "WARNING", f"Groq Self-Corrector failed, trying Anthropic... Details: {e}")
+
+    if not corrected_code and anthropic_client:
+        try:
+            system_instruction = "You are the PrompterOS Self-Corrector kernel (Core 03). Resolve code errors based on the traceback. Return ONLY clean corrected code."
+            response = anthropic_client.messages.create(
                 model="claude-3-5-sonnet-latest",
                 max_tokens=1000,
                 temperature=0.2,
@@ -251,9 +320,11 @@ def corrector_node(state: AgentState) -> AgentState:
                 messages=[{"role": "user", "content": f"Errors:\n{errors_list}\n\nCode to repair:\n{code}"}]
             )
             corrected_code = response.content[0].text
-        except Exception:
-            corrected_code = code + "\n# Patched by Self-Corrector Core\n"
-    else:
+        except Exception as e:
+            print(f"Anthropic Self-Corrector failed: {e}")
+            database.add_log("Corrector", "WARNING", f"Anthropic Self-Corrector failed... Details: {e}")
+
+    if not corrected_code:
         # Mock correction
         corrected_code = code + "\n# Patched: Restored disk buffer link and resolved ZeroDivisionError.\n"
 

@@ -5,6 +5,7 @@ from typing import List, Optional
 import os
 import json
 import anthropic
+from groq import Groq
 from dotenv import load_dotenv
 
 import database
@@ -52,10 +53,11 @@ async def startup_event():
 # 1. Parse prompt & boot LangGraph workflow
 @app.post("/api/parse-intent")
 async def parse_intent(request: PromptRequest, background_tasks: BackgroundTasks):
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
     prompt = request.prompt
     
-    # Define fallback action schema if Anthropic API is not available
+    # Define fallback action schema if LLM APIs are not available
     action_data = {
         "action_type": "GENERATE_CODE",
         "target": "logistics_tracker.py",
@@ -63,9 +65,61 @@ async def parse_intent(request: PromptRequest, background_tasks: BackgroundTasks
         "required_cores": ["Planner", "Coder", "Tester", "Deployer", "HydraDB"]
     }
     
-    if api_key:
+    success = False
+    
+    if groq_api_key:
         try:
-            client = anthropic.Anthropic(api_key=api_key)
+            client = Groq(api_key=groq_api_key)
+            system_instruction = (
+                "You are the PrompterOS Kernel Parser. Your job is to translate messy, casual human intent "
+                "into a strict JSON action schema matching the provided tool definition. "
+                "Do not include any conversational pleasantries."
+            )
+            
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+                tools=[
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "parse_to_action_schema",
+                            "description": "Outputs the structured operating system action commands.",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "action_type": {"type": "string", "description": "e.g. GENERATE_CODE, DEBUG_FILE, READ_DOCS"},
+                                    "target": {"type": "string", "description": "e.g. logistics_tracker.py, main.py"},
+                                    "instructions": {"type": "string", "description": "Filtered core task description"},
+                                    "required_cores": {
+                                        "type": "array", 
+                                        "items": {"type": "string"},
+                                        "description": "Cores required, e.g. ['Planner', 'Coder', 'Tester']"
+                                    }
+                                },
+                                "required": ["action_type", "target", "instructions", "required_cores"]
+                            }
+                        }
+                    }
+                ],
+                tool_choice={"type": "function", "function": {"name": "parse_to_action_schema"}}
+            )
+            
+            # Extract output from Groq response
+            tool_call = response.choices[0].message.tool_calls[0]
+            action_data = json.loads(tool_call.function.arguments)
+            success = True
+        except Exception as e:
+            print(f"Groq parsing failed. Error: {e}")
+            database.add_log("System", "WARNING", f"Groq parser failed, trying Anthropic... Details: {e}")
+            
+    if not success and anthropic_api_key:
+        try:
+            client = anthropic.Anthropic(api_key=anthropic_api_key)
             system_instruction = (
                 "You are the PrompterOS Kernel Parser. Your job is to translate messy, casual human intent "
                 "into a strict JSON action schema matching the provided tool definition. "
@@ -103,15 +157,20 @@ async def parse_intent(request: PromptRequest, background_tasks: BackgroundTasks
             
             # Extract output
             action_data = response.content[0].input
+            success = True
         except Exception as e:
-            print(f"Anthropic parsing failed, using smart fallback. Error: {e}")
-            database.add_log("System", "WARNING", f"Parser warning: falling back to mock schema. Details: {e}")
-            if "logistics" in prompt.lower():
-                action_data["target"] = "logistics_tracker.py"
-            elif "sort" in prompt.lower() or "search" in prompt.lower():
-                action_data["target"] = "sorting_algorithm.py"
-            else:
-                action_data["target"] = "app_server.py"
+            print(f"Anthropic parsing failed. Error: {e}")
+            database.add_log("System", "WARNING", f"Anthropic parser failed. Details: {e}")
+            
+    if not success:
+        # Fallback smart parse based on simple string matching
+        database.add_log("System", "WARNING", "LLM parsing unavailable. Falling back to local smart parser.")
+        if "logistics" in prompt.lower():
+            action_data["target"] = "logistics_tracker.py"
+        elif "sort" in prompt.lower() or "search" in prompt.lower():
+            action_data["target"] = "sorting_algorithm.py"
+        else:
+            action_data["target"] = "app_server.py"
 
     # Log command validation in HydraDB
     database.add_log("Prompter", "INFO", f"user >> {prompt}")
