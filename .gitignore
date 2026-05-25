@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# recursive rules for subdirectories
+node_modules/
+.next/
+out/
+__pycache__/
+*.pyc
+hydradb.db
